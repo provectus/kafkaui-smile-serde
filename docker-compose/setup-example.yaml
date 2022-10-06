@@ -1,0 +1,57 @@
+---
+version: '2'
+services:
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8080:8080
+    depends_on:
+      - zookeeper0
+      - kafka0
+    environment:
+      kafka.clusters.0.name: MyFavoriteCluster
+      kafka.clusters.0.bootstrapServers: kafka0:29092
+
+      kafka.clusters.0.serde.0.name: Smile (Default)
+      kafka.clusters.0.serde.0.filePath: /smile-serde/kafka-ui-smile-serde-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+      kafka.clusters.0.serde.0.className: com.provectus.kafka.ui.serdes.smile.SmileSerde
+
+      kafka.clusters.0.serde.1.name: Smile (Without header)
+      kafka.clusters.0.serde.1.filePath: /smile-serde/kafka-ui-smile-serde-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+      kafka.clusters.0.serde.1.className: com.provectus.kafka.ui.serdes.smile.SmileSerde
+      kafka.clusters.0.serde.1.properties.generator.WRITE_HEADER: "false"
+      kafka.clusters.0.serde.1.properties.parser.REQUIRE_HEADER: "false"
+
+      # you can also use upper-cased variables like that:
+#      KAFKA_CLUSTERS_0_SERDE_1_NAME: Smile
+#      KAFKA_CLUSTERS_0_SERDE_1_FILE_PATH: /smile-serde
+#      KAFKA_CLUSTERS_0_SERDE_1_CLASS_NAME: com.provectus.kafka.ui.serdes.smile.SmileSerde
+#      KAFKA_CLUSTERS_0_SERDE_1_PROPERTIES_PARSER_REQUIRE_HEADER: "false"
+#      KAFKA_CLUSTERS_0_SERDE_1_PROPERTIES_GENERATOR_WRITE_HEADER: "false"
+    volumes:
+      - ./../target:/smile-serde
+
+  zookeeper0:
+    image: confluentinc/cp-zookeeper:5.2.4
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 2181:2181
+
+  kafka0:
+    image: confluentinc/cp-kafka:5.3.1
+    depends_on:
+      - zookeeper0
+    ports:
+      - 9092:9092
+      - 9997:9997
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper0:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka0:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
