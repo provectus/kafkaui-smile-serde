@@ -36,11 +36,11 @@ jobs:
         uses: svenstaro/upload-release-action@2.3.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/kafka-ui-smile-serde-${{ steps.build.outputs.version }}.jar
+          file: target/kafka-ui-smile-serde-${{ steps.build.outputs.version }}-jar-with-dependencies.jar
           tag: ${{ github.event.release.tag_name }}
 
       - name: Archive JAR
         uses: actions/upload-artifact@v3
         with:
           name: kafka-ui-smile-serde-${{ steps.build.outputs.version }}
-          path: target/kafka-ui-smile-serde-${{ steps.build.outputs.version }}.jar
+          path: target/kafka-ui-smile-serde-${{ steps.build.outputs.version }}-jar-with-dependencies.jar
